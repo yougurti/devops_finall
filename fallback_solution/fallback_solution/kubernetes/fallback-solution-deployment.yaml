@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fallback-solution
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fallback-solution
+  template:
+    metadata:
+      labels:
+        app: fallback-solution
+    spec:
+      containers:
+      - name: fallback-solution
+        image: yougurti/fallback-solution:latest
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fallback-solution-service
+spec:
+  selector:
+    app: fallback-solution
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fallback-solution-ingress
+spec:
+  rules:
+  - host: fallback-solution.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: fallback-solution-service
+            port:
+              number: 80
